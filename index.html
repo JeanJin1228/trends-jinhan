@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔥 热点趋势 · 靳涵IP内容仪表盘</title>
+<style>
+  :root {
+    --bg: #0D1520;
+    --card-bg: #111D2B;
+    --border: #1A2A3A;
+    --teal: #1A8E9E;
+    --cyan: #17BEC7;
+    --text: #C8D6E5;
+    --text-dim: #6B7B8D;
+    --accent-red: #FF6B6B;
+    --accent-orange: #FFA726;
+    --tag-bg: rgba(26, 142, 158, 0.15);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-left h1 {
+    font-size: 28px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--cyan), var(--teal));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header-left .subtitle {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .update-badge {
+    background: var(--tag-bg);
+    color: var(--cyan);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    border: 1px solid rgba(26, 142, 158, 0.25);
+  }
+
+  .status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: var(--cyan);
+    border-radius: 50%;
+    margin-right: 6px;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    flex: 1;
+  }
+
+  .stat-card .stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--cyan);
+  }
+
+  .stat-card .stat-label {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* Main grid */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .grid-full {
+    grid-column: 1 / -1;
+  }
+
+  /* Card */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .card-header .icon {
+    font-size: 20px;
+  }
+
+  .card-header .count {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text-dim);
+    background: rgba(255,255,255,0.05);
+    padding: 4px 10px;
+    border-radius: 12px;
+  }
+
+  .card-body {
+    padding: 16px 24px;
+  }
+
+  /* Trend item */
+  .trend-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    transition: background 0.2s;
+  }
+
+  .trend-item:last-child {
+    border-bottom: none;
+  }
+
+  .trend-item:hover {
+    background: rgba(26, 142, 158, 0.05);
+    margin: 0 -24px;
+    padding-left: 24px;
+    padding-right: 24px;
+    border-radius: 8px;
+  }
+
+  .trend-rank {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.06);
+    color: var(--text-dim);
+  }
+
+  .trend-rank.top1 { background: var(--accent-red); color: #fff; }
+  .trend-rank.top2 { background: var(--accent-orange); color: #fff; }
+  .trend-rank.top3 { background: #FFD54F; color: #1a1a1a; }
+
+  .trend-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .trend-title {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+    margin-bottom: 4px;
+  }
+
+  .trend-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 11px;
+    color: var(--text-dim);
+    flex-wrap: wrap;
+  }
+
+  .trend-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .trend-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--tag-bg);
+    color: var(--teal);
+  }
+
+  .trend-score {
+    font-size: 11px;
+    color: var(--accent-orange);
+    font-weight: 600;
+  }
+
+  /* Inspiration section */
+  .inspiration-list {
+    list-style: none;
+  }
+
+  .inspiration-list li {
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    background: rgba(26, 142, 158, 0.06);
+    border-left: 3px solid var(--teal);
+    border-radius: 0 8px 8px 0;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .inspiration-list li .dir-name {
+    font-weight: 600;
+    color: var(--cyan);
+  }
+
+  .inspiration-list li .dir-signals {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-dim);
+  }
+
+  .empty-state .icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 32px 0 16px;
+    font-size: 12px;
+    color: var(--text-dim);
+    border-top: 1px solid var(--border);
+    margin-top: 32px;
+  }
+
+  .footer a {
+    color: var(--teal);
+    text-decoration: none;
+  }
+
+  /* Loading */
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-dim);
+  }
+
+  .loading .spinner {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--cyan);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Error banner */
+  .error-banner {
+    background: rgba(255, 107, 107, 0.15);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    color: var(--accent-red);
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    display: none;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr; }
+    .stats-bar { flex-wrap: wrap; }
+    .header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h1>🔥 热点趋势仪表盘</h1>
+      <div class="subtitle">靳涵IP · 内容选题数据中枢 | 抖音 · 小红书 · B站 · 视频号</div>
+    </div>
+    <div class="header-right">
+      <div class="update-badge" id="updateBadge">
+        <span class="status-dot"></span>加载中...
+      </div>
+    </div>
+  </div>
+
+  <!-- Error banner -->
+  <div class="error-banner" id="errorBanner"></div>
+
+  <!-- Stats bar -->
+  <div class="stats-bar" id="statsBar"></div>
+
+  <!-- Main grid -->
+  <div class="grid" id="mainGrid">
+    <div class="loading grid-full">
+      <div class="spinner"></div>
+      <p style="margin-top:12px">正在加载热点数据...</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>🤖 由 <a href="https://jinhan-ai.surge.sh" target="_blank">书生AI</a> 自动采集 | 
+       数据源: B站API · 百度热搜 | 
+       每日 08:00 更新 | 
+       <a href="https://jinhan-ai.surge.sh" target="_blank">靳涵官网 →</a></p>
+  </div>
+</div>
+
+<script>
+// Try to load data
+async function loadData() {
+  try {
+    const resp = await fetch('trends_data.json?' + Date.now());
+    if (!resp.ok) throw new Error('数据文件不存在（可能尚未采集）');
+    const data = await resp.json();
+    render(data);
+  } catch (err) {
+    showError('⚠️ 趋势数据暂不可用。每日 08:00 自动采集，请稍后再试。');
+    showEmptyState();
+  }
+}
+
+function showError(msg) {
+  const banner = document.getElementById('errorBanner');
+  banner.textContent = msg;
+  banner.style.display = 'block';
+}
+
+function showEmptyState() {
+  document.getElementById('updateBadge').innerHTML = '<span style="color:#FF6B6B">●</span> 暂无数据';
+  document.getElementById('statsBar').innerHTML = '';
+  document.getElementById('mainGrid').innerHTML = `
+    <div class="empty-state grid-full">
+      <div class="icon">📡</div>
+      <p>等待数据采集中...</p>
+      <p style="font-size:12px;margin-top:8px">每日 08:00 自动采集四大平台热点</p>
+    </div>`;
+}
+
+function render(data) {
+  // Update badge
+  const time = new Date(data.collected_at);
+  const timeStr = time.toLocaleString('zh-CN', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+  document.getElementById('updateBadge').innerHTML = `<span class="status-dot"></span>更新于 ${timeStr}`;
+  
+  // Stats
+  const bili = data.sources.bilibili_popular || [];
+  const baidu = data.sources.baidu_hot || [];
+  const bing = data.sources.bing_news || {};
+  const bingCount = Object.values(bing).reduce((s, arr) => s + arr.length, 0);
+  
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-value">${bili.length}</div>
+      <div class="stat-label">📺 B站热门视频</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${baidu.length}</div>
+      <div class="stat-label">🔍 百度热搜词条</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${bingCount}</div>
+      <div class="stat-label">📰 行业趋势报道</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${data.date}</div>
+      <div class="stat-label">📅 数据日期</div>
+    </div>
+  `;
+
+  // Build grid
+  let html = '';
+  
+  // B站热门
+  html += `<div class="card">
+    <div class="card-header">
+      <span class="icon">📺</span> B站热门 Top10
+      <span class="count">${bili.length} 条</span>
+    </div>
+    <div class="card-body">`;
+  
+  if (bili.length === 0) {
+    html += '<div class="empty-state"><p>暂无B站数据</p></div>';
+  } else {
+    bili.slice(0, 10).forEach((v, i) => {
+      const rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
+      html += `
+      <div class="trend-item">
+        <div class="trend-rank ${rankClass}">${i + 1}</div>
+        <div class="trend-content">
+          <div class="trend-title">${escHtml(v.title)}</div>
+          <div class="trend-meta">
+            <span>👤 ${escHtml(v.author)}</span>
+            <span>▶ ${fmtNum(v.play)}</span>
+            <span>💬 ${fmtNum(v.danmaku)}</span>
+            ${v.tag ? `<span class="trend-tag">${escHtml(v.tag)}</span>` : ''}
+          </div>
+        </div>
+      </div>`;
+    });
+  }
+  html += '</div></div>';
+
+  // 百度热搜
+  html += `<div class="card">
+    <div class="card-header">
+      <span class="icon">🔍</span> 百度热搜 Top15
+      <span class="count">${baidu.length} 条</span>
+    </div>
+    <div class="card-body">`;
+  
+  if (baidu.length === 0) {
+    html += '<div class="empty-state"><p>暂无百度热搜数据</p></div>';
+  } else {
+    baidu.slice(0, 15).forEach((item, i) => {
+      const rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
+      html += `
+      <div class="trend-item">
+        <div class="trend-rank ${rankClass}">${i + 1}</div>
+        <div class="trend-content">
+          <div class="trend-title">${item.is_top ? '🔝 ' : ''}${escHtml(item.title)}</div>
+          <div class="trend-meta">
+            ${item.score ? `<span class="trend-score">🔥 ${fmtNum(item.score)}</span>` : ''}
+          </div>
+        </div>
+      </div>`;
+    });
+  }
+  html += '</div></div>';
+
+  // 选题灵感 (full-width)
+  html += `<div class="card grid-full">
+    <div class="card-header">
+      <span class="icon">💡</span> 靳涵IP 选题灵感
+      <span class="count">基于热点智能匹配</span>
+    </div>
+    <div class="card-body">
+      <ul class="inspiration-list">`;
+  
+  // Generate inspiration from data
+  const inspirations = getInspirations(data);
+  if (inspirations.length > 0) {
+    inspirations.forEach(insp => {
+      html += `<li>
+        <div class="dir-name">${insp.direction}</div>
+        <div class="dir-signals">检测到信号: ${insp.signals}</div>
+      </li>`;
+    });
+  } else {
+    html += `<li>
+      <div class="dir-name">🎯 建议关注方向</div>
+      <div class="dir-signals">结合当日B站热门和百度热搜趋势，从靳涵8大方向中选取最佳切入角度</div>
+    </li>`;
+  }
+  
+  html += `</ul></div></div>`;
+
+  document.getElementById('mainGrid').innerHTML = html;
+}
+
+function getInspirations(data) {
+  const bili = data.sources.bilibili_popular || [];
+  const baidu = data.sources.baidu_hot || [];
+  const allTitles = [...bili.slice(0,10).map(v => (v.title + ' ' + (v.tag || ''))), 
+                    ...baidu.slice(0,10).map(i => i.title)].join(' ');
+  
+  const topics = {
+    '文旅×ACG IP融合': ['游戏', 'IP', '动画', '动漫', '漫展', '二次元', 'ACG', '联动', '手游', '端游', '国创', '番剧', '鬼畜'],
+    '二次元IP×新餐饮': ['美食', '餐饮', '咖啡', '奶茶', '主题店', '谷子', '联名', '探店', '料理'],
+    '户外运动×文化社区': ['户外', '运动', '滑雪', '露营', '滑板', '冲浪', '骑行', '徒步'],
+    'AI+消费新场景': ['AI', '科技', '智能', '数码', '机器人', '算法', '自动'],
+    '中式非遗文化品牌': ['非遗', '传统', '手艺', '匠人', '工艺', '国乐', '戏曲', '汉服', '民俗'],
+    '在地文化新营销': ['文化', '旅游', '景区', '博物馆', '地方', '文旅', '旅行', '毕业展', '艺术展'],
+    '中式奢品话语权': ['品牌', '奢侈', '国潮', '高端', '美学', '设计'],
+    '设计师品牌红利期': ['设计', '艺术', '创意', '原创', '独立', '小众', '手工'],
+  };
+  
+  const results = [];
+  for (const [dir, keywords] of Object.entries(topics)) {
+    const matched = keywords.filter(kw => allTitles.includes(kw));
+    if (matched.length > 0) {
+      results.push({ direction: dir, signals: matched.slice(0, 4).join('、') });
+    }
+  }
+  
+  // Sort by most matches
+  results.sort((a, b) => b.signals.split('、').length - a.signals.split('、').length);
+  return results.slice(0, 6);
+}
+
+function escHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function fmtNum(n) {
+  if (!n) return '0';
+  if (n >= 10000) return (n / 10000).toFixed(1) + '万';
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
+  return n.toString();
+}
+
+// Auto-refresh every 5 minutes
+loadData();
+setInterval(loadData, 5 * 60 * 1000);
+</script>
+</body>
+</html>
